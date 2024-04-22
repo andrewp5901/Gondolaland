@@ -9,6 +9,20 @@ let mineLocations = [];
 document.addEventListener('DOMContentLoaded', init);
 let firstClick = true; // Track if the first click has happened
 
+function loadLeaderboard() {
+    const leaderboard = document.getElementById('leaderboard');
+    let scores = JSON.parse(localStorage.getItem('minesweeperScores')) || [];
+    leaderboard.innerHTML = '';
+    scores.forEach(score => {
+        const scoreElement = document.createElement('li');
+        scoreElement.textContent = `${score.name}: ${score.time} seconds`;
+        leaderboard.appendChild(scoreElement);
+    });
+}
+
+
+
+
 function init() {
     console.log("Initializing game...");
     document.getElementById('gameContainer').innerHTML = '';
@@ -17,6 +31,7 @@ function init() {
     board = Array(size * size).fill(null);
     document.getElementById('winMessage').textContent = '';
     resetTimer();
+    loadLeaderboard();
 
     for (let i = 0; i < size * size; i++) {
         const cell = document.createElement('div');
@@ -25,6 +40,7 @@ function init() {
 
         cell.addEventListener('click', handleCellClick);
         cell.addEventListener('contextmenu', handleRightClick);
+        cell.addEventListener('auxclick', handleMiddleClick);
         document.getElementById('gameContainer').appendChild(cell);
     }
 }
@@ -34,23 +50,41 @@ function handleCellClick(e) {
     const index = parseInt(cell.dataset.index);
 
     if (firstClick) {
-        placeMines(index); // Place mines on first click, ensuring first clicked cell isn't a mine
+        startTimer();
+        placeMines(index);
         firstClick = false;
     }
 
     if (cell.classList.contains('open') || cell.classList.contains('flagged')) return;
+
+    openCell(cell, index);
+}
+
+function openCell(cell, index) {
     if (board[index] === 'M') {
-        revealMines();
-        stopTimer();
-        document.getElementById('winMessage').textContent = 'Game Over';
+        if (!cell.classList.contains('open')) {
+            revealMines();
+            stopTimer();
+            document.getElementById('winMessage').textContent = 'Game Over';
+        }
         return;
     }
 
-    // Continue with game logic if not a mine
     const adjacentMines = calculateAdjacentMines(index);
     cell.textContent = adjacentMines > 0 ? adjacentMines : '';
     cell.classList.add('open');
     openedCells++;
+
+    if (adjacentMines === 0 && !cell.classList.contains('flagged')) {
+        let neighbors = getNeighborIndices(index);
+        neighbors.forEach(neighborIndex => {
+            const neighborCell = document.getElementById('gameContainer').children[neighborIndex];
+            if (!neighborCell.classList.contains('open')) {
+                openCell(neighborCell, neighborIndex);
+            }
+        });
+    }
+
     if (openedCells === size * size - mines) {
         stopTimer();
         const playerName = prompt("Congratulations! Enter your name for the leaderboard:", "Player");
@@ -58,6 +92,7 @@ function handleCellClick(e) {
         document.getElementById('winMessage').textContent = 'You Win!';
     }
 }
+
 
 function placeMines(firstClickedIndex) {
     while (mineLocations.length < mines) {
@@ -78,17 +113,28 @@ function handleRightClick(e) {
 }
 
 function handleMiddleClick(e) {
-    if (e.button === 1) { // 1 is the middle button
+    if (e.button === 1) { // Check if the middle button was clicked
         const cellIndex = parseInt(e.target.dataset.index);
+        if (!document.getElementById('gameContainer').children[cellIndex].classList.contains('open')) {
+            return; // Do nothing if the cell is not open
+        }
+
         const neighbors = getNeighborIndices(cellIndex);
-        neighbors.forEach(index => {
-            const neighborCell = document.getElementById('gameContainer').children[index];
-            if (!neighborCell.classList.contains('open') && !neighborCell.dataset.mine) {
-                neighborCell.click(); // simulate click on neighbor cells that are not opened or mined
-            }
-        });
+        const flaggedCount = neighbors.filter(index => document.getElementById('gameContainer').children[index].classList.contains('flagged')).length;
+        const mineCount = calculateAdjacentMines(cellIndex);
+
+        if (flaggedCount === mineCount) {
+            neighbors.forEach(index => {
+                const neighborCell = document.getElementById('gameContainer').children[index];
+                if (!neighborCell.classList.contains('open') && !neighborCell.classList.contains('flagged')) {
+                    neighborCell.dispatchEvent(new MouseEvent('click'));  // Trigger click event programmatically
+                }
+            });
+        }
     }
 }
+
+
 
 function revealMines() {
     mineLocations.forEach(index => {
@@ -178,7 +224,7 @@ function resetTimer() {
     }
     timer = 0;
     document.getElementById('timer').textContent = 'Time: ' + timer;
-    startTimer(); // Assumes you have a function to start the timer
+    //startTimer(); // Assumes you have a function to start the timer
 }
 
 

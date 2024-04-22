@@ -46,24 +46,29 @@ button:hover {
 }
 
 #leaderboard {
-    margin-top: 20px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    width: 50%;
-    margin: auto;
+    font-family: 'Comic Sans MS', cursive; /* Fun, meme-like font */
+    background-color: #f0f0f0; /* Light grey background */
+    border: 2px solid #333; /* Solid border */
+    border-radius: 10px; /* Rounded corners */
     padding: 10px;
+    width: 50%; /* Adjust based on your layout */
+    margin: 20px auto; /* Center align */
+    list-style-type: none; /* Remove default list styling */
 }
 
 #leaderboard li {
-    font-size: 16px;
-    border-bottom: 1px solid #dee2e6;
-    padding: 5px;
+    padding: 8px;
+    border-bottom: 1px solid #ccc; /* Light grey line between items */
 }
 
 #leaderboard li:last-child {
-    border-bottom: none;
+    border-bottom: none; /* No border for the last item */
 }
+
+#leaderboard li:hover {
+    background-color: #e9e9e9; /* Light hover effect */
+}
+
 
 .cell {
     width: 40px;  /* Adjust if necessary */
