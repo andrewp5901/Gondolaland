@@ -1,0 +1,66 @@
+/* Basic reset and box-sizing for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern, clean font */
+    background-color: #f0fff4; /* Very light green background */
+    color: #333; /* Soft black for text */
+    line-height: 1.5;
+    padding: 20px;
+}
+
+header {
+    background-color: #e6ffe6; /* Very light green header */
+    color: #0a0a0a; /* Slightly off-black for a softer contrast */
+    padding: 20px 0;
+    text-align: center;
+    font-size: 24px;
+    border-bottom: 2px solid #ccffcc; /* Light green border for subtle separation */
+}
+
+nav {
+    background-color: #f0fff4; /* Matching the body's background */
+    padding: 15px 0;
+    text-align: center;
+    border-bottom: 1px solid #ccffcc; /* Light green border for continuity */
+}
+
+nav a {
+    color: #007bff; /* Blue for links to add a pop of color */
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: 600;
+}
+
+section {
+    background-color: #ffffff; /* White background for content sections */
+    padding: 20px;
+    margin: 20px auto; /* Centered with auto margins */
+    max-width: 1000px; /* Maximum width for better control on large screens */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+article {
+    margin-bottom: 20px; /* Spacing between articles */
+}
+
+img, video {
+    max-width: 100%; /* Ensures responsiveness */
+    height: auto; /* Maintain aspect ratio */
+    display: block; /* Aligns images and videos nicely */
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #e6ffe6; /* Very light green footer */
+    color: #666; /* Darker grey for footer text */
+    border-top: 1px solid #ccffcc; /* Light green border on top */
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
