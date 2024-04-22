@@ -7,6 +7,7 @@ let board = [];
 let mineLocations = [];
 
 document.addEventListener('DOMContentLoaded', init);
+let firstClick = true; // Track if the first click has happened
 
 function init() {
     console.log("Initializing game...");
@@ -17,45 +18,53 @@ function init() {
     document.getElementById('winMessage').textContent = '';
     resetTimer();
 
-    while (mineLocations.length < mines) {
-        let randomPosition = Math.floor(Math.random() * size * size);
-        if (!mineLocations.includes(randomPosition)) {
-            mineLocations.push(randomPosition);
-            board[randomPosition] = 'M';
-        }
-    }
-
     for (let i = 0; i < size * size; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = i;
-        cell.dataset.mine = board[i] === 'M';
 
         cell.addEventListener('click', handleCellClick);
         cell.addEventListener('contextmenu', handleRightClick);
-        cell.addEventListener('auxclick', handleMiddleClick);  // Add middle-click listener
-
         document.getElementById('gameContainer').appendChild(cell);
     }
 }
 
 function handleCellClick(e) {
     const cell = e.target;
+    const index = parseInt(cell.dataset.index);
+
+    if (firstClick) {
+        placeMines(index); // Place mines on first click, ensuring first clicked cell isn't a mine
+        firstClick = false;
+    }
+
     if (cell.classList.contains('open') || cell.classList.contains('flagged')) return;
-    if (cell.dataset.mine) {
+    if (board[index] === 'M') {
         revealMines();
         stopTimer();
         document.getElementById('winMessage').textContent = 'Game Over';
-    } else {
-        const adjacentMines = calculateAdjacentMines(parseInt(cell.dataset.index));
-        cell.textContent = adjacentMines > 0 ? adjacentMines : '';
-        cell.classList.add('open');
-        openedCells++;
-        if (openedCells === size * size - mines) {
-            stopTimer();
-            const playerName = prompt("Congratulations! Enter your name for the leaderboard:", "Player");
-            updateLeaderboard(timer, playerName);
-            document.getElementById('winMessage').textContent = 'You Win!';
+        return;
+    }
+
+    // Continue with game logic if not a mine
+    const adjacentMines = calculateAdjacentMines(index);
+    cell.textContent = adjacentMines > 0 ? adjacentMines : '';
+    cell.classList.add('open');
+    openedCells++;
+    if (openedCells === size * size - mines) {
+        stopTimer();
+        const playerName = prompt("Congratulations! Enter your name for the leaderboard:", "Player");
+        updateLeaderboard(timer, playerName);
+        document.getElementById('winMessage').textContent = 'You Win!';
+    }
+}
+
+function placeMines(firstClickedIndex) {
+    while (mineLocations.length < mines) {
+        let randomPosition = Math.floor(Math.random() * size * size);
+        if (!mineLocations.includes(randomPosition) && randomPosition !== firstClickedIndex) {
+            mineLocations.push(randomPosition);
+            board[randomPosition] = 'M';
         }
     }
 }
@@ -152,9 +161,26 @@ function updateLeaderboard(time, playerName) {
 }
 
 function resetGame() {
-    stopTimer();
-    init();
+    stopTimer();  // Stop the current game's timer
+    firstClick = true;  // Reset the first click flag
+    document.getElementById('gameContainer').innerHTML = '';  // Clear the game container
+    openedCells = 0;  // Reset the count of opened cells
+    mineLocations = [];  // Clear the existing mine locations
+    board = Array(size * size).fill(null);  // Reset the board
+    document.getElementById('winMessage').textContent = '';  // Clear any win/lose messages
+    init();  // Reinitialize the game setup
 }
+
+
+function resetTimer() {
+    if (timeInterval) {
+        clearInterval(timeInterval);
+    }
+    timer = 0;
+    document.getElementById('timer').textContent = 'Time: ' + timer;
+    startTimer(); // Assumes you have a function to start the timer
+}
+
 
 Date.prototype.getWeekNumber = function() {
     const d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
